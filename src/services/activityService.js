@@ -11,13 +11,14 @@ class ActivityService {
       data.type,
       data.diff,
       data.finalQty,
-      data.price
+      data.price,
+      data.performer || 'System'
     ];
 
     try {
       await sheets.spreadsheets.values.append({
         spreadsheetId,
-        range: `${activitySheetName}!A:G`,
+        range: `${activitySheetName}!A:H`,
         valueInputOption: 'RAW',
         resource: { values: [newRow] },
       });
@@ -30,7 +31,7 @@ class ActivityService {
   async getAll() {
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `${activitySheetName}!A2:G`,
+      range: `${activitySheetName}!A2:H`,
     });
 
     const rows = response.data.values || [];
@@ -42,6 +43,7 @@ class ActivityService {
       diff: parseInt(row[4]) || 0,
       finalQty: parseInt(row[5]) || 0,
       price: parseFloat(row[6]) || 0,
+      performer: row[7] || 'System',
     })).reverse(); // Newest first
   }
 }

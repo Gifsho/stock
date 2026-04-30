@@ -86,7 +86,8 @@ class StockService {
       type: 'create',
       diff: data.qty,
       finalQty: data.qty,
-      price: data.price
+      price: data.price,
+      performer: data.performer
     });
 
     return { id, ...data, updatedAt };
@@ -124,7 +125,8 @@ class StockService {
       type: data.qty !== undefined ? 'qtyChange' : 'update',
       diff: data.qty !== undefined ? (data.qty - currentRow.qty) : 0,
       finalQty: data.qty !== undefined ? data.qty : currentRow.qty,
-      price: data.price !== undefined ? data.price : currentRow.price
+      price: data.price !== undefined ? data.price : currentRow.price,
+      performer: data.performer
     });
 
     return { id, ...data, updatedAt };
@@ -164,7 +166,8 @@ class StockService {
       type: 'delete',
       diff: -currentStock.qty,
       finalQty: 0,
-      price: currentStock.price
+      price: currentStock.price,
+      performer: data.performer
     });
 
     return { id };
