@@ -159,7 +159,8 @@ class StockService {
       }
     });
 
-    // Log activity
+    // No activity log for delete as requested
+    /*
     await activityService.log({
       stockId: id,
       stockName: currentStock.name,
@@ -167,8 +168,9 @@ class StockService {
       diff: -currentStock.qty,
       finalQty: 0,
       price: currentStock.price,
-      performer: data.performer
+      performer: 'System'
     });
+    */
 
     return { id };
   }
