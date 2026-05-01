@@ -2,6 +2,13 @@ const { sheets, spreadsheetId, sheetName } = require('../config/googleSheets');
 const { v4: uuidv4 } = require('uuid');
 const activityService = require('./activityService');
 
+const getThailandTime = () => {
+  const d = new Date();
+  const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+  const nd = new Date(utc + (3600000 * 7));
+  return nd.toISOString().replace('Z', '+07:00');
+};
+
 class StockService {
   async getAll(page = 1, limit = 10, search = '', sortBy = '', order = 'asc') {
     const response = await sheets.spreadsheets.values.get({
@@ -10,7 +17,7 @@ class StockService {
     });
 
     let rows = response.data.values || [];
-    
+
     // Filter out empty rows and map to objects
     let items = rows
       .filter(row => row.length > 0 && row[0]) // Ensure row has at least an ID
@@ -25,8 +32,8 @@ class StockService {
     // Search filter
     if (search) {
       const lowerSearch = search.toLowerCase();
-      items = items.filter(item => 
-        item.name.toLowerCase().includes(lowerSearch) || 
+      items = items.filter(item =>
+        item.name.toLowerCase().includes(lowerSearch) ||
         item.id.toLowerCase().includes(lowerSearch)
       );
     }
@@ -69,7 +76,7 @@ class StockService {
 
   async create(data) {
     const id = uuidv4();
-    const updatedAt = new Date().toISOString();
+    const updatedAt = getThailandTime();
     const newRow = [id, data.name, data.qty, data.price, updatedAt];
 
     await sheets.spreadsheets.values.append({
@@ -96,12 +103,12 @@ class StockService {
   async update(id, data) {
     const all = await this.getAll(1, 10000); // Fetch all to find index
     const index = all.data.findIndex(item => item.id === id);
-    
+
     if (index === -1) throw new Error('Item not found');
 
     const rowIndex = index + 2; // +2 because of header and 1-based indexing
-    const updatedAt = new Date().toISOString();
-    
+    const updatedAt = getThailandTime();
+
     const currentRow = all.data[index];
     const updatedRow = [
       id,
@@ -135,7 +142,7 @@ class StockService {
   async delete(id) {
     const all = await this.getAll(1, 10000);
     const index = all.data.findIndex(item => item.id === id);
-    
+
     if (index === -1) throw new Error('Item not found');
 
     const currentStock = all.data[index];
@@ -148,7 +155,7 @@ class StockService {
           {
             deleteDimension: {
               range: {
-                sheetId: 0, 
+                sheetId: 0,
                 dimension: 'ROWS',
                 startIndex: rowIndex,
                 endIndex: rowIndex + 1

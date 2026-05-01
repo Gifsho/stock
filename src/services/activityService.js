@@ -1,9 +1,16 @@
 const { sheets, spreadsheetId, activitySheetName } = require('../config/googleSheets');
 
+const getThailandTime = () => {
+  const d = new Date();
+  const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+  const nd = new Date(utc + (3600000 * 7));
+  return nd.toISOString().replace('Z', '+07:00');
+};
+
 class ActivityService {
   async log(data) {
     // Expected data: { stockId, stockName, type, diff, finalQty, price }
-    const timestamp = new Date().toISOString();
+    const timestamp = getThailandTime();
     const newRow = [
       timestamp,
       data.stockId,
