@@ -19,4 +19,6 @@ module.exports = {
   spreadsheetId: process.env.GOOGLE_SHEET_ID,
   sheetName: process.env.GOOGLE_SHEET_NAME || 'Sheet1',
   activitySheetName: process.env.ACTIVITY_SHEET_NAME || 'Activities',
+  billSheetName: process.env.BILL_SHEET_NAME || 'BillTransactions',
+  billGoalSheetName: process.env.BILL_GOAL_SHEET_NAME || 'BillGoals',
 };

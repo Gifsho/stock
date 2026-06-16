@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const stockRoutes = require('./routes/stockRoutes');
 const activityRoutes = require('./routes/activityRoutes');
+const billRoutes = require('./routes/billRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 // Routes
 app.use('/api/stock', stockRoutes);
 app.use('/api/activities', activityRoutes);
+app.use('/api/bill', billRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
