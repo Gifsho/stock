@@ -45,11 +45,11 @@ class BillService {
 
   // ========== Transactions ==========
 
-  async getAllTransactions(page = 1, limit = 50, search = '', sortBy = '', order = 'asc', filterMonth = '', filterCategory = '') {
-    await this.ensureSheet(billSheetName, ['ID', 'Date', 'Description', 'Amount', 'Type', 'Category', 'Note', 'CreatedAt']);
+  async getAllTransactions(page = 1, limit = 50, search = '', sortBy = '', order = 'asc', filterMonth = '', filterCategory = '', accountId = '') {
+    await this.ensureSheet(billSheetName, ['ID', 'Date', 'Description', 'Amount', 'Type', 'Category', 'Note', 'CreatedAt', 'AccountId']);
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `${billSheetName}!A2:H`,
+      range: `${billSheetName}!A2:I`,
     });
 
     let rows = response.data.values || [];
@@ -64,7 +64,8 @@ class BillService {
         type: row[4] || '',
         category: row[5] || '',
         note: row[6] || '',
-        createdAt: row[7] || ''
+        createdAt: row[7] || '',
+        accountId: row[8] || '',
       }));
 
     if (search) {
@@ -81,6 +82,10 @@ class BillService {
 
     if (filterCategory) {
       items = items.filter(item => item.category === filterCategory);
+    }
+
+    if (accountId) {
+      items = items.filter(item => item.accountId === accountId);
     }
 
     if (sortBy) {
@@ -111,14 +116,14 @@ class BillService {
   }
 
   async createTransaction(data) {
-    await this.ensureSheet(billSheetName, ['ID', 'Date', 'Description', 'Amount', 'Type', 'Category', 'Note', 'CreatedAt']);
+    await this.ensureSheet(billSheetName, ['ID', 'Date', 'Description', 'Amount', 'Type', 'Category', 'Note', 'CreatedAt', 'AccountId']);
     const id = uuidv4().substring(0, 8);
     const now = getThailandTime();
-    const newRow = [id, data.date, data.description, data.amount, data.type, data.category, data.note || '', now];
+    const newRow = [id, data.date, data.description, data.amount, data.type, data.category, data.note || '', now, data.accountId || ''];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: `${billSheetName}!A:H`,
+      range: `${billSheetName}!A:I`,
       valueInputOption: 'RAW',
       resource: { values: [newRow] },
     });
@@ -141,12 +146,13 @@ class BillService {
       data.type !== undefined ? data.type : currentRow.type,
       data.category !== undefined ? data.category : currentRow.category,
       data.note !== undefined ? data.note : currentRow.note,
-      currentRow.createdAt
+      currentRow.createdAt,
+      data.accountId !== undefined ? data.accountId : currentRow.accountId,
     ];
 
     await sheets.spreadsheets.values.update({
       spreadsheetId,
-      range: `${billSheetName}!A${rowIndex}:H${rowIndex}`,
+      range: `${billSheetName}!A${rowIndex}:I${rowIndex}`,
       valueInputOption: 'RAW',
       resource: { values: [updatedRow] },
     });
