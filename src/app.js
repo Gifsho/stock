@@ -4,6 +4,7 @@ const stockRoutes = require('./routes/stockRoutes');
 const activityRoutes = require('./routes/activityRoutes');
 const billRoutes = require('./routes/billRoutes');
 const accountRoutes = require('./routes/accountRoutes');
+const rateRoutes = require('./routes/rateRoutes');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 
 const app = express();
@@ -16,6 +17,7 @@ app.use('/api/stock', stockRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/bill', billRoutes);
 app.use('/api/bill/accounts', accountRoutes);
+app.use('/api', rateRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
