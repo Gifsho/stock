@@ -20,9 +20,33 @@ const formatDate = (val) => {
 };
 
 class BillService {
+  async ensureSheet(name, headers) {
+    try {
+      await sheets.spreadsheets.get({ spreadsheetId, ranges: [name] });
+    } catch {
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        resource: {
+          requests: [{
+            addSheet: {
+              properties: { title: name },
+            },
+          }],
+        },
+      });
+      await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range: `${name}!A1`,
+        valueInputOption: 'RAW',
+        resource: { values: [headers] },
+      });
+    }
+  }
+
   // ========== Transactions ==========
 
   async getAllTransactions(page = 1, limit = 50, search = '', sortBy = '', order = 'asc', filterMonth = '', filterCategory = '') {
+    await this.ensureSheet(billSheetName, ['ID', 'Date', 'Description', 'Amount', 'Type', 'Category', 'Note', 'CreatedAt']);
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: `${billSheetName}!A2:H`,
@@ -87,6 +111,7 @@ class BillService {
   }
 
   async createTransaction(data) {
+    await this.ensureSheet(billSheetName, ['ID', 'Date', 'Description', 'Amount', 'Type', 'Category', 'Note', 'CreatedAt']);
     const id = uuidv4().substring(0, 8);
     const now = getThailandTime();
     const newRow = [id, data.date, data.description, data.amount, data.type, data.category, data.note || '', now];
@@ -158,6 +183,7 @@ class BillService {
   // ========== Goals ==========
 
   async getAllGoals() {
+    await this.ensureSheet(billGoalSheetName, ['ID', 'Name', 'Target', 'Deadline', 'CreatedAt']);
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: `${billGoalSheetName}!A2:E`,
@@ -176,6 +202,7 @@ class BillService {
   }
 
   async createGoal(data) {
+    await this.ensureSheet(billGoalSheetName, ['ID', 'Name', 'Target', 'Deadline', 'CreatedAt']);
     const id = uuidv4().substring(0, 8);
     const now = getThailandTime();
     const newRow = [id, data.name, data.target, data.deadline || '', now];
