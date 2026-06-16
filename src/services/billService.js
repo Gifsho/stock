@@ -154,11 +154,18 @@ class BillService {
     return { id, ...data };
   }
 
+  async getSheetId(name) {
+    const meta = await sheets.spreadsheets.get({ spreadsheetId });
+    const sheet = meta.data.sheets.find(s => s.properties.title === name);
+    return sheet ? sheet.properties.sheetId : 0;
+  }
+
   async deleteTransaction(id) {
     const all = await this.getAllTransactions(1, 10000);
     const index = all.data.findIndex(item => item.id === id);
     if (index === -1) throw new Error('Transaction not found');
 
+    const sheetId = await this.getSheetId(billSheetName);
     const rowIndex = index + 1;
 
     await sheets.spreadsheets.batchUpdate({
@@ -167,7 +174,7 @@ class BillService {
         requests: [{
           deleteDimension: {
             range: {
-              sheetId: 0,
+              sheetId,
               dimension: 'ROWS',
               startIndex: rowIndex,
               endIndex: rowIndex + 1
@@ -222,6 +229,7 @@ class BillService {
     const index = goals.findIndex(g => g.id === id);
     if (index === -1) throw new Error('Goal not found');
 
+    const sheetId = await this.getSheetId(billGoalSheetName);
     const rowIndex = index + 1;
 
     await sheets.spreadsheets.batchUpdate({
@@ -230,7 +238,7 @@ class BillService {
         requests: [{
           deleteDimension: {
             range: {
-              sheetId: 0,
+              sheetId,
               dimension: 'ROWS',
               startIndex: rowIndex,
               endIndex: rowIndex + 1
