@@ -36,7 +36,7 @@ class AccountService {
         spreadsheetId,
         range: `${ACCOUNT_SHEET}!A1`,
         valueInputOption: 'RAW',
-        resource: { values: [['ID', 'Name', 'Type', 'Balance', 'Icon', 'Color', 'CreatedAt']] },
+        resource: { values: [['ID', 'Name', 'Type', 'Balance', 'Icon', 'Color', 'CreatedAt', 'Currency']] },
       });
     }
   }
@@ -45,7 +45,7 @@ class AccountService {
     await this.ensureSheet();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `${ACCOUNT_SHEET}!A2:G`,
+      range: `${ACCOUNT_SHEET}!A2:H`,
     });
 
     const rows = response.data.values || [];
@@ -59,6 +59,7 @@ class AccountService {
         icon: row[4] || '',
         color: row[5] || '#0984e3',
         createdAt: row[6] || '',
+        currency: row[7] || 'THB',
       }));
   }
 
@@ -66,11 +67,11 @@ class AccountService {
     await this.ensureSheet();
     const id = uuidv4().substring(0, 8);
     const now = getThailandTime();
-    const newRow = [id, data.name, data.type || 'wallet', data.balance || 0, data.icon || '', data.color || '#0984e3', now];
+    const newRow = [id, data.name, data.type || 'wallet', data.balance || 0, data.icon || '', data.color || '#0984e3', now, data.currency || 'THB'];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: `${ACCOUNT_SHEET}!A:G`,
+      range: `${ACCOUNT_SHEET}!A:H`,
       valueInputOption: 'RAW',
       resource: { values: [newRow] },
     });
@@ -94,11 +95,12 @@ class AccountService {
       data.icon !== undefined ? data.icon : current.icon,
       data.color !== undefined ? data.color : current.color,
       current.createdAt,
+      data.currency !== undefined ? data.currency : current.currency,
     ];
 
     await sheets.spreadsheets.values.update({
       spreadsheetId,
-      range: `${ACCOUNT_SHEET}!A${rowIndex}:G${rowIndex}`,
+      range: `${ACCOUNT_SHEET}!A${rowIndex}:H${rowIndex}`,
       valueInputOption: 'RAW',
       resource: { values: [updatedRow] },
     });

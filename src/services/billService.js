@@ -198,10 +198,10 @@ class BillService {
   // ========== Goals ==========
 
   async getAllGoals() {
-    await this.ensureSheet(billGoalSheetName, ['ID', 'Name', 'Target', 'Deadline', 'CreatedAt']);
+    await this.ensureSheet(billGoalSheetName, ['ID', 'Name', 'Target', 'Deadline', 'CreatedAt', 'Currency']);
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `${billGoalSheetName}!A2:E`,
+      range: `${billGoalSheetName}!A2:F`,
     });
 
     const rows = response.data.values || [];
@@ -212,19 +212,20 @@ class BillService {
         name: row[1] || '',
         target: parseFloat(row[2]) || 0,
         deadline: formatDate(row[3]),
-        createdAt: row[4] || ''
+        createdAt: row[4] || '',
+        currency: row[5] || 'THB',
       }));
   }
 
   async createGoal(data) {
-    await this.ensureSheet(billGoalSheetName, ['ID', 'Name', 'Target', 'Deadline', 'CreatedAt']);
+    await this.ensureSheet(billGoalSheetName, ['ID', 'Name', 'Target', 'Deadline', 'CreatedAt', 'Currency']);
     const id = uuidv4().substring(0, 8);
     const now = getThailandTime();
-    const newRow = [id, data.name, data.target, data.deadline || '', now];
+    const newRow = [id, data.name, data.target, data.deadline || '', now, data.currency || 'THB'];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: `${billGoalSheetName}!A:E`,
+      range: `${billGoalSheetName}!A:F`,
       valueInputOption: 'RAW',
       resource: { values: [newRow] },
     });
